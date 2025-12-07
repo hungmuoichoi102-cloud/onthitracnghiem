@@ -1,0 +1,48 @@
+name: Auto Deploy to InfinityFree Host
+
+# Kích hoạt workflow khi có sự kiện push code lên branch 'main'
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ftp_deploy_job:
+    # Chạy trên hệ điều hành ảo Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+    # Bước 1: Lấy code từ repo (Checkout)
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # --- (Phần CI: Build/Test - Chỉ cần nếu là dự án React/Vue/Node.js) ---
+    # Nếu code của bạn là HTML/CSS/JS thuần, BỎ QUA phần này.
+    # Ví dụ cho dự án Node.js/Frontend:
+    # - name: Setup Node.js
+    #   uses: actions/setup-node@v4
+    #   with:
+    #     node-version: '18'
+    # - name: Install Dependencies
+    #   run: npm install
+    # - name: Run Build
+    #   run: npm run build
+    # ------------------------------------------------------------------------
+
+    # Bước 2: Triển khai lên host (CD)
+    - name: Deploy via FTP to InfinityFree
+      # Sử dụng action của bên thứ 3 chuyên dùng để triển khai qua FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.0
+      with:
+        # Thông tin kết nối lấy từ Secrets đã tạo
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        
+        # Thư mục gốc trên host (nơi web chạy)
+        server-dir: /htdocs/
+        
+        # Thư mục chứa code nguồn/code đã build trên GitHub.
+        # Nếu không có bước build, giữ nguyên là './' (thư mục gốc)
+        # Nếu có build, thay bằng thư mục build (ví dụ: './dist')
+        local-dir: ./
