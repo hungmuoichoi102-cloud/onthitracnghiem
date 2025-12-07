@@ -1,0 +1,74 @@
+/* Responsive styles for mobile devices */
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.main_container {
+  width: 90%;
+  max-width: 900px;
+  margin: 12px auto;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.btn_container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.btn_chucNang {
+  flex: 1 1 140px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn_chucNang a, .btn_lamLai a, .btn_chucNang, .btn_lamLai {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+form input[type="submit"], .btn_lamLai {
+  width: 100%;
+}
+
+/* Make question blocks and inputs more touch friendly */
+div[style*="border: 1px solid"] {
+  padding: 12px;
+}
+label {
+  display: block;
+  padding: 6px 0;
+}
+
+.login_container, .register_container {
+  width: 94%;
+  max-width: 420px;
+  margin: 28px auto;
+  padding: 14px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 600px) {
+  .login_container, .register_container {
+    margin: 60px auto;
+  }
+  form input[type="submit"], .btn_lamLai {
+    width: auto;
+    min-width: 140px;
+  }
+  .main_container {
+    width: 60%;
+  }
+}
+
+@media (max-width: 420px) {
+  .login_container, .register_container {
+    margin: 18px auto;
+    padding: 12px;
+  }
+}
