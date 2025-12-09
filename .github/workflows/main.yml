@@ -16,19 +16,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # --- (Phần CI: Build/Test - Chỉ cần nếu là dự án React/Vue/Node.js) ---
-    # Nếu code của bạn là HTML/CSS/JS thuần, BỎ QUA phần này.
-    # Ví dụ cho dự án Node.js/Frontend:
-    # - name: Setup Node.js
-    #   uses: actions/setup-node@v4
-    #   with:
-    #     node-version: '18'
-    # - name: Install Dependencies
-    #   run: npm install
-    # - name: Run Build
-    #   run: npm run build
-    # ------------------------------------------------------------------------
-
     # Bước 2: Triển khai lên host (CD)
     - name: Deploy via FTP to InfinityFree
       # Sử dụng action của bên thứ 3 chuyên dùng để triển khai qua FTP
