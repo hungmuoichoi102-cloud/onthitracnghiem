@@ -65,7 +65,7 @@ $conn->close();
         .login_container input[type="submit"] {
             margin-top: 15px;
             padding: 10px;
-            background-color: #da1717ff;
+            background-color: #930fe6ff;
             color: white;
             border: none;
             border-radius: 3px;
