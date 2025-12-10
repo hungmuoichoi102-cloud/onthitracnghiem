@@ -5,15 +5,15 @@ include 'db_connect.php';
 $questions = [];
 $score = 0;
 
-// Truy vấn CHỈ CÂU HỎI của người dùng hiện tại
-$sql = "SELECT * FROM questions WHERE user_id = '$current_user_id' ORDER BY RAND()";
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        $questions[] = $row;
-    }
+// Truy vấn CÂU HỎI của người dùng hiện tại
+try {
+    $stmt = $conn->prepare("SELECT * FROM questions WHERE user_id = :uid ORDER BY RAND()");
+    $stmt->execute([':uid' => $current_user_id]);
+    $questions = $stmt->fetchAll();
+} catch (PDOException $e) {
+    $questions = [];
 }
+
 $total_questions = count($questions);
 
 // Xử lý Nộp bài
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $total_questions > 0) {
         }
     }
 }
-$conn->close();
+// PDO connection doesn't need explicit close
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -88,11 +88,14 @@ $conn->close();
     <p>Chào <?php echo htmlspecialchars($current_username); ?>! Đây là các câu hỏi trắc nghiệm của bạn.</p>
     <div class="btn_container">
         <div class="btn_chucNang">
-        <a href="add_question.php">Thêm Câu Hỏi Mới</a>
-    </div>
-    <div class="btn_chucNang">
-        <a href="logout.php">Đăng Xuất</a>
-    </div>
+            <a href="add_question.php">Thêm Câu Hỏi Mới</a>
+        </div>
+        <div class="btn_chucNang">
+            <a href="manage_questions.php">Quản lý Câu Hỏi</a>
+        </div>
+        <div class="btn_chucNang">
+            <a href="logout.php">Đăng Xuất</a>
+        </div>
     </div>
     <hr>
     <?php if ($is_submitted): ?>

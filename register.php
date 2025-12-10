@@ -10,33 +10,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($username) || empty($password)) {
         $message = "Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu.";
     } else {
-        // Mã hóa mật khẩu an toàn
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        try {
+            // Kiểm tra username đã tồn tại chưa
+            $check_stmt = $conn->prepare("SELECT id FROM users WHERE username = :username");
+            $check_stmt->execute([':username' => $username]);
 
-        // 1. Kiểm tra username đã tồn tại chưa (Sử dụng Prepared Statements)
-        $check_stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
-        $check_stmt->bind_param("s", $username);
-        $check_stmt->execute();
-        $check_stmt->store_result();
-        
-        if ($check_stmt->num_rows > 0) {
-            $message = "Tên đăng nhập đã tồn tại!";
-        } else {
-            // 2. Thêm người dùng mới
-            $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-            $stmt->bind_param("ss", $username, $hashed_password);
-
-            if ($stmt->execute()) {
-                $message = "Đăng ký thành công! Bạn có thể <a href='login.php'>Đăng nhập</a> ngay.";
+            if ($check_stmt->rowCount() > 0) {
+                $message = "Tên đăng nhập đã tồn tại!";
             } else {
-                $message = "Lỗi đăng ký: " . $stmt->error;
+                $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (:username, :password)");
+                $stmt->execute([':username' => $username, ':password' => $hashed_password]);
+                $message = "Đăng ký thành công! Bạn có thể <a href='login.php'>Đăng nhập</a> ngay.";
             }
-            $stmt->close();
+        } catch (PDOException $e) {
+            $message = "Lỗi đăng ký: " . htmlspecialchars($e->getMessage());
         }
-        $check_stmt->close();
     }
 }
-$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="vi">

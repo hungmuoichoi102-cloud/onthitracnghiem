@@ -5,28 +5,32 @@ include 'db_connect.php';
 $message = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Lọc dữ liệu đầu vào để chống XSS
-    $question_text = $conn->real_escape_string($_POST['question_text']);
-    $option_a = $conn->real_escape_string($_POST['option_a']);
-    $option_b = $conn->real_escape_string($_POST['option_b']);
-    $option_c = $conn->real_escape_string($_POST['option_c']);
-    $option_d = $conn->real_escape_string($_POST['option_d']);
-    $correct_answer = strtoupper($conn->real_escape_string($_POST['correct_answer']));
+    // Lọc dữ liệu đầu vào để chống XSS khi hiển thị; lưu vào DB bằng prepared statements
+    $question_text = trim($_POST['question_text']);
+    $option_a = trim($_POST['option_a']);
+    $option_b = trim($_POST['option_b']);
+    $option_c = trim($_POST['option_c']);
+    $option_d = trim($_POST['option_d']);
+    $correct_answer = strtoupper(trim($_POST['correct_answer']));
     
     $user_id = $current_user_id; // Lấy ID người dùng từ auth.php
 
-    // Chèn câu hỏi, LUÔN kèm theo user_id
-    $stmt = $conn->prepare("INSERT INTO questions (question_text, option_a, option_b, option_c, option_d, correct_answer, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssssi", $question_text, $option_a, $option_b, $option_c, $option_d, $correct_answer, $user_id);
-
-    if ($stmt->execute()) {
+    try {
+        $stmt = $conn->prepare("INSERT INTO questions (question_text, option_a, option_b, option_c, option_d, correct_answer, user_id) VALUES (:q, :a, :b, :c, :d, :correct, :uid)");
+        $stmt->execute([
+            ':q' => $question_text,
+            ':a' => $option_a,
+            ':b' => $option_b,
+            ':c' => $option_c,
+            ':d' => $option_d,
+            ':correct' => $correct_answer,
+            ':uid' => $user_id,
+        ]);
         $message = "Thêm câu hỏi thành công! ✅";
-    } else {
-        $message = "Lỗi: " . $stmt->error;
+    } catch (PDOException $e) {
+        $message = "Lỗi: " . htmlspecialchars($e->getMessage());
     }
-    $stmt->close();
 }
-$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="vi">

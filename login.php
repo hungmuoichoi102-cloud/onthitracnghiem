@@ -8,31 +8,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $password = $_POST['password'];
 
-    // 1. Lấy thông tin người dùng từ database
-    $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows === 1) {
-        $user = $result->fetch_assoc();
-        // 2. So sánh mật khẩu (dùng password_verify)
-        if (password_verify($password, $user['password'])) {
-            // Đăng nhập thành công: Lưu ID và Username vào Session
+    try {
+        $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = :username");
+        $stmt->execute([':username' => $username]);
+        $user = $stmt->fetch();
+
+        if ($user && password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
-            
-            header("Location: index.php"); // Chuyển hướng đến trang ôn thi
+            header("Location: index.php");
             exit();
         } else {
             $message = "Tên đăng nhập hoặc mật khẩu không đúng!";
         }
-    } else {
-        $message = "Tên đăng nhập hoặc mật khẩu không đúng!";
+    } catch (PDOException $e) {
+        $message = "Lỗi đăng nhập: " . htmlspecialchars($e->getMessage());
     }
-    $stmt->close();
 }
-$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="vi">
